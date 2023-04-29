@@ -14,3 +14,6 @@ textArea.id = "textarea"
 textArea.rows = "5"
 textArea.cols = "50";
 centralizer.append(textArea);
+
+
+body.append(centralizer);
