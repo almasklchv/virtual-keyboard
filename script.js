@@ -181,6 +181,24 @@ centralizer.append(language);
 
 body.append(centralizer);
 
+setTimeout(() => {
+    if (localStorage.getItem('rus')) {
+        let rus = document.querySelectorAll('.rus'); 
+        let eng = document.querySelectorAll('.eng');
+        if (!localStorage.getItem('rus').includes('hidden')) {
+            for (let i = 0; i < rus.length; i++) {
+                
+                rus[i].classList.toggle('hidden');
+                eng[i].classList.toggle('hidden');
+            } 
+        }
+    }
+}, 200);
+    
+
+
+
+
 let shiftClicked = false;
 
 // клавиши подсвечиваются во время клика на них
@@ -234,6 +252,9 @@ document.addEventListener('keydown', (event) => { // во время зажат�
             rus[i].classList.toggle('hidden');
             eng[i].classList.toggle('hidden')
         } 
+
+        localStorage.setItem('rus', rus[0].classList);
+        localStorage.setItem('eng', eng[0].classList);
         
     }
 
