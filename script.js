@@ -76,6 +76,74 @@ function addKeyOptions(row, keyName, lang, elem) {
     elem.append(shiftCaps);
 }
 
+function addCharactersToTextArea(key) {
+    if (key.classList.contains('key')) {
+        let langs = key.children;
+    
+        for (let i = 0; i < langs.length; i++) {
+            if (langs[i].classList.contains('hidden')) {
+                continue;
+            }
+
+            let options = langs[i].children;
+            for (let j = 0; j < options.length; j++) {
+                if (options[j].classList.contains('hidden')) {
+                    continue;
+                }
+                textArea.textContent += options[j].textContent;
+            }
+        }
+    }
+}
+
+function changeKeysWhileClickServiceKeys(defaultElem, elem) {
+        for (let i = 0; i < defaultElem.length; i++) {
+            defaultElem[i].classList.toggle('hidden');
+            elem[i].classList.toggle('hidden');
+        }
+}
+
+function handleKeystrokes(key) {
+    if (key === 'Backspace') {
+        textArea.textContent = textArea.textContent.slice(0, -1);
+    }
+
+    if (key === 'CapsLock') {
+        let caseDown = document.querySelectorAll('.caseDown');
+        let caps = document.querySelectorAll('.caps');
+        let caseUp = document.querySelectorAll('.caseUp');
+        let shiftCaps = document.querySelectorAll('.shiftCaps');
+        if (caseUp[0].classList.contains('hidden') && shiftCaps[0].classList.contains('hidden')) {
+            changeKeysWhileClickServiceKeys(caseDown, caps)
+        } else {
+            changeKeysWhileClickServiceKeys(caseUp, shiftCaps)
+        }
+        
+    }
+
+    if (key === 'ShiftLeft' || key === 'ShiftRight') {
+        
+        let caseDown = document.querySelectorAll('.caseDown');
+        let caps = document.querySelectorAll('.caps');
+        let caseUp = document.querySelectorAll('.caseUp');
+        let shiftCaps = document.querySelectorAll('.shiftCaps');
+        if (caps[0].classList.contains('hidden')) {
+            changeKeysWhileClickServiceKeys(caseDown, caseUp);
+        } else {
+            changeKeysWhileClickServiceKeys(caps, shiftCaps)
+        }
+    }
+
+    if (key === 'Enter') {
+        textArea.textContent += '\n';
+    }
+
+    if (key === 'Tab') {
+        textArea.textContent += '\t';
+    }
+}
+
+
 
 const body = document.body; // тело документа
 
@@ -112,3 +180,99 @@ centralizer.append(language);
 
 
 body.append(centralizer);
+
+let shiftClicked = false;
+
+// клавиши подсвечиваются во время клика на них
+document.addEventListener('keyup', (event) => { // обработчик события, когда палец убирается с клавиши
+    let key = document.querySelector('.' + event.code);
+    
+    if (key && !key.classList.contains('CapsLock')) {
+        key.classList.remove('active');
+    }
+
+    if (event.code === 'ShiftLeft' || event.code === 'ShiftRight') {
+        let caseDown = document.querySelectorAll('.caseDown');
+        let caps = document.querySelectorAll('.caps');
+        let caseUp = document.querySelectorAll('.caseUp');
+        let shiftCaps = document.querySelectorAll('.shiftCaps');
+        
+        
+        if (!document.querySelector('.CapsLock').classList.contains('active')) {
+            changeKeysWhileClickServiceKeys(caseDown, caseUp);
+        } else {
+            changeKeysWhileClickServiceKeys(caps, shiftCaps)
+        }
+       
+    }
+    
+});
+
+document.addEventListener('keydown', (event) => { // во время зажатия на клавишу
+    event.preventDefault()
+    let key = document.querySelector('.' + event.code);
+    let keysNotToText = ['Tab', 'Backspace', 'Delete', 'CapsLock', 'Enter', 'ShiftLeft', 'ShiftRight', 'ControlLeft', 'MetaLeft', 'AltLeft', 'AltRight', 'ControlRight'];
+    if (key) {
+        if (!key.classList.contains('active') && !key.classList.contains('CapsLock')) {
+            key.classList.add('active');
+        } else if (key.classList.contains('CapsLock')) {
+            key.classList.toggle('active')
+        }
+        
+        if (!keysNotToText.includes(event.code)) {
+            addCharactersToTextArea(key); 
+        }
+       
+        
+    }
+
+    if (event.ctrlKey && event.altKey) {
+        let rus = document.querySelectorAll('.rus'); 
+        let eng = document.querySelectorAll('.eng');
+        
+        for (let i = 0; i < rus.length; i++) {
+            rus[i].classList.toggle('hidden');
+            eng[i].classList.toggle('hidden')
+        } 
+        
+    }
+
+    handleKeystrokes(event.code);
+
+    
+})
+
+keyboardBody.addEventListener('mousedown', (event) => {
+    let key = event.target.parentNode.parentNode;
+    let keysNotToText = ['Tab', 'Backspace', 'Delete', 'CapsLock', 'Enter', 'ShiftLeft', 'ShiftRight', 'ControlLeft', 'MetaLeft', 'AltLeft', 'AltRight', 'ControlRight'];
+    key.classList.toggle('active'); 
+    if (!keysNotToText.includes(key.classList[1])) {
+        addCharactersToTextArea(key); 
+    }
+    handleKeystrokes(key.classList[1]);
+
+})
+
+keyboardBody.addEventListener('mouseup', (event) => {
+    let key = event.target.parentNode.parentNode;
+    
+    if (key.classList[1] === 'ShiftLeft' || key.classList[1]  === 'ShiftRight') {
+        let caseDown = document.querySelectorAll('.caseDown');
+        let caps = document.querySelectorAll('.caps');
+        let caseUp = document.querySelectorAll('.caseUp');
+        let shiftCaps = document.querySelectorAll('.shiftCaps');
+        
+        
+        if (!document.querySelector('.CapsLock').classList.contains('active')) {
+            changeKeysWhileClickServiceKeys(caseDown, caseUp);
+        } else {
+            changeKeysWhileClickServiceKeys(caps, shiftCaps)
+        }
+        key.classList.toggle('active'); 
+       
+    } else if (!key.classList.contains('CapsLock')) {
+        key.classList.toggle('active'); 
+        handleKeystrokes(key.classList[1]);
+    }
+    
+})
